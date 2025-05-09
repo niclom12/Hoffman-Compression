@@ -1,6 +1,9 @@
+/**
+ * This is the file that contains the minheap logic. We will use this data structure to create a priority queue and assign codes that way.
+ */
 #include <stdio.h>
 #include <stdlib.h>
-#include "priority_queue.h"
+#include "minheap.h"
 
 void minheap_init(MinHeap *heap) {
     heap->size = 0;

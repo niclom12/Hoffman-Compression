@@ -1,5 +1,5 @@
-#ifndef PRIORITY_QUEUE_H
-#define PRIORITY_QUEUE_H
+#ifndef MINHEAP_H
+#define MINHEAP_H
 
 #define MAX_HEAP_SIZE 256
 
