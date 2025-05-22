@@ -4,7 +4,7 @@
 #define MAX_HEAP_SIZE 256
 
 typedef struct Node {
-    char ch;
+    __uint8_t ch;
     int freq;
     struct Node *left;
     struct Node *right;
@@ -18,5 +18,7 @@ typedef struct {
 void minheap_init(MinHeap *heap);
 void minheap_insert(MinHeap *heap, Node *node);
 Node* minheap_extract_min(MinHeap *heap);
+int unit_test();
+Node *create_node(__uint8_t ch, int freq);
 
 #endif

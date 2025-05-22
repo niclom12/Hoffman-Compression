@@ -59,7 +59,7 @@ Node* minheap_extract_min(MinHeap *heap) {
     return min;
 }
 
-Node* create_node(char ch, int freq) {
+Node* create_node(__uint8_t ch, int freq) {
     Node* node = malloc(sizeof(Node));
     node->ch = ch;
     node->freq = freq;
@@ -67,7 +67,7 @@ Node* create_node(char ch, int freq) {
     return node;
 }
 
-int main() {
+int unit_test() {
     MinHeap heap;
     minheap_init(&heap);
 
