@@ -2,6 +2,7 @@
  * This is the code used to read in the files and break them up into their tokens/symbles. Plan to extend to other file types
  */
 #include "fileio.h"
+#include "minheap.h"
 #include <stdlib.h>
 
 /**
@@ -100,6 +101,9 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    // Call unit tests of min heap
+    unit_test();
 
     return 0;
 }

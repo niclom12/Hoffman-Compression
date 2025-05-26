@@ -67,7 +67,7 @@ Node* create_node(char ch, int freq) {
     return node;
 }
 
-int main() {
+int unit_test() {
     MinHeap heap;
     minheap_init(&heap);
 

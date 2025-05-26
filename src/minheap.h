@@ -18,5 +18,6 @@ typedef struct {
 void minheap_init(MinHeap *heap);
 void minheap_insert(MinHeap *heap, Node *node);
 Node* minheap_extract_min(MinHeap *heap);
+int unit_test();
 
 #endif
