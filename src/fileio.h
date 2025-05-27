@@ -24,4 +24,13 @@ int write_binary_file(const char *filename, const __uint8_t *data, long length);
 // Write decompressed plain text
 int write_text_file(const char *filename, const char *text, long length);
 
+// Builds huffman tree and returns the root. 
+int buildHuffman(int *freq, int *left, int *right, int *parent);
+// Encode entire buffer
+void huffmanEncode(char *buffer, long k, int *left, int *parent, int root);
+// Encode One Entry
+void huffmanEncodeOne(int x, int *left, int *parent, int root);
+// Decode entire buffer (assumes buildHuffman has run).
+char *huffmanDecode(Boolean *B, int *left, int *right, int root, long length);
+
 #endif

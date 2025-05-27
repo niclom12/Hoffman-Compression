@@ -146,6 +146,7 @@ void huffmanEncodeOne(int x, int *left, int *parent, int root) {
 
 // As in textbook
 // ! We would not usually have length so this needs to be adjusted
+// ! It also assumes we have left, right and root (which we need to explicitly add in encoding I believe)
 char* huffmanDecode(Boolean *B, int *left, int *right, int root, long length) {
     int k = 0;
     int v = root;
@@ -197,7 +198,8 @@ int main(int argc, char *argv[]) {
 
     // Build HuffMan code and print out
     // TODO: Rework this size, because its uneccessary, we only need enough for
-    // each entry that has a frequency to be combined, thats the n. Just not sure how as yet.
+    // each entry that has a frequency to be combined, thats the n. 
+    // Looks like implementation needs to change, maybe use Canonical Huffman Codes.
     // TODO: Fix using int and char interchangeably (its fine when we just go to I assume longs for everything)
     int left[HUFFMAN_SIZE];
     int right[HUFFMAN_SIZE];
@@ -227,6 +229,11 @@ int main(int argc, char *argv[]) {
         }
         printf("\n");
     }
+
+    // Memory management
+    free(buffer);
+    free(B);
+    free(A);
 
     return 0;
 }
