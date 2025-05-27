@@ -84,12 +84,19 @@ char *runLengthEncode(char *buffer, long length)
 {
     // Written for how many bytes written
     int runLength, written, j = 0;
-    // Max size (unfortunately)
+    // Max size (unfortunately) (If every char is a number)
     int maxSize = (length * 2 + 1);
     char *encoded = (char *)malloc(sizeof(char) * maxSize);
 
     for (size_t i = 0; i < length; i++)
     {
+        // Escape digits and escape escapes
+        if (isdigit(buffer[i])) {
+            encoded[j++] = '\\';
+        } else if (buffer[i] == '\\') {
+            encoded[j++] = '\\';
+            encoded[j++] = '\\';
+        }
         // Copy first occurence
         encoded[j++] = buffer[i];
 
@@ -100,6 +107,12 @@ char *runLengthEncode(char *buffer, long length)
             i++;
         }
 
+        // A -> A, not A -> A1
+        if (runLength == 1) {
+            continue;
+        }
+
+        // Slightly more effecient than geeksforgeeks method. 
         written = snprintf(encoded + j, maxSize - j, "%d", runLength);
 
         if (written < 0 || written >= maxSize - j)
@@ -126,9 +139,14 @@ char *runLengthDecode(char *buffer, long length)
     
     while (i < length)
     {
+        // Get next character, and escapes ends previous runs
         currentChar = buffer[i++];
+        if (currentChar == '\\') {
+            currentChar = buffer[i++];
+        }
 
-        repeats = buffer[i++] - '0';
+        // Not garunteed to have a digit next (because could have just A of example).
+        repeats = 0;
         while (isdigit(buffer[i]))
         {
             repeats = repeats * 10 + (buffer[i++] - '0');
@@ -143,7 +161,10 @@ char *runLengthDecode(char *buffer, long length)
             decoded = tmp;
         }        
 
-        // A4 -> AAAA
+        // A4 -> AAAA, but also A -> A (we do not expect A1)
+        if (repeats == 0) {
+            repeats = 1;
+        }
         for (size_t k = 0; k < repeats; k++)
         {
             decoded[j++] = currentChar;
@@ -182,14 +203,17 @@ int main(int argc, char *argv[]) {
     // Call unit tests of min heap
     unit_test();
 
-    // TODO: Handle digits. Like the idea of escape characters the most (other good option is fixed width runs)
-    char *buffer = "AAAaaaBB   BCCCDDDEEEEEeEE!!?!!__-- XYZxXxXxX"
+    // Automatically freed
+    char *buffer = "AAAaaaBB   BCCCDDDEEEEEeEE!!?!!__-- XYZxXxXxX112315982039142333333333333333333\\"
                    "LLLLLLLLLlllllllllZZZZZzzzzzMMMMMnnnpppppPpPpP";
     printf("Original version: %s\n", buffer);
     char *buffer2 = runLengthEncode(buffer, strlen(buffer));
     printf(" Encoded version: %s\n", buffer2);
     char *buffer3 = runLengthDecode(buffer2, strlen(buffer2));
     printf(" Decoded version: %s\n", buffer3);
+    // Memory management
+    free(buffer2);
+    free(buffer3);
 
     return 0;
 }

@@ -78,5 +78,10 @@ int unit_test() {
     Node *min = minheap_extract_min(&heap);
     printf("Min char: %c, freq: %d\n", min->ch, min->freq);
 
+    // Memory Management
+    free(min);
+    free(minheap_extract_min(&heap));
+    free(minheap_extract_min(&heap));
+
     return 0;
 }
