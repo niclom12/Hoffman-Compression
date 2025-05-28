@@ -3,7 +3,7 @@
 COMPILER ?= $(GCC_PATH)gcc
 
 #All implicit rules include ‘$(CFLAGS)’ among the arguments given to the compiler.
-CFLAGS ?= -O2 -Wall $(GCC_SUPPFLAGS) #-DDEBUG
+CFLAGS ?= -O2 -Wall $(GCC_SUPPFLAGS) -DDEBUG
 
 #Extra non-library flags to give to compilers when they invoke the linker (‘ld’), e.g., -L. 
 LDFLAGS ?= -g
