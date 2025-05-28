@@ -2,7 +2,9 @@
  * This is the code used to read in the files and break them up into their tokens/symbles. Plan to extend to other file types
  */
 #include "fileio.h"
+#include "minheap.h"
 #include <stdlib.h>
+#include "boolean.h"
 #include "huffsize.h"
 
 // Bit array for encoded / decoded version of buffer
