@@ -4,50 +4,45 @@
 #include "list.h"
 #include "mtf.h"
 
-unsigned char *mtf_encode(const unsigned char *in,
-                                 size_t n, size_t *out_len)
-{
-    unsigned char *out = malloc(n);
+uint8_t *mtf_encode(const uint8_t *in, size_t n, size_t *out_len) {
+    uint8_t *out = malloc(n);
     if (!out) return NULL;
 
-    /* initial list 0..255 */
-    unsigned char list[256];
-    for (int i = 0; i < 256; ++i) list[i] = (unsigned char)i;
+    // initial list 0..255
+    uint8_t list[256];
+    for (int i = 0; i < 256; i++) list[i] = (uint8_t)i;
 
-    for (size_t i = 0; i < n; ++i) {
-        unsigned char c = in[i];
-
-        /* find c’s current position */
+    for (size_t i = 0; i < n; i++) {
+        uint8_t c = in[i];
+        // find c
         int j = 0;
-        while (list[j] != c) ++j;       /* 0-255 worst-case */
-
-        out[i] = (unsigned char)j;      /* write index     */
+        while (list[j] != c) j++;
+        // write index
+        out[i] = (uint8_t)j;
         *out_len = i+1;
-
-        /* move to front */
-        while (j) { list[j] = list[j-1]; --j; }
+        // move to front: shift list[0..j-1] right, place c at list[0]
+        memmove(&list[1], &list[0], j);
         list[0] = c;
     }
     return out;
 }
 
-unsigned char *mtf_decode(const unsigned char *indices,
-                                 size_t n, size_t *out_len)
-{
-    unsigned char *out = malloc(n);
+uint8_t *mtf_decode(const uint8_t *indices, size_t n, size_t *out_len) {
+    uint8_t *out = malloc(n);
     if (!out) return NULL;
 
-    unsigned char list[256];
-    for (int i = 0; i < 256; ++i) list[i] = (unsigned char)i;
+    // initial list 0..255
+    uint8_t list[256];
+    for (int i = 0; i < 256; i++) list[i] = (uint8_t)i;
 
-    for (size_t i = 0; i < n; ++i) {
-        int k = indices[i];                 /* 0-255 */
-        unsigned char c = list[k];
+    for (size_t i = 0; i < n; i++) {
+        int k = indices[i];        // 0..255
+        uint8_t c = list[k];
         out[i] = c;
         *out_len = i+1;
 
-        /* move c to front */
-        while (k) { list[k] = list[k-1]; --k; }
+        // move c to front
+        memmove(&list[1], &list[0], k);
         list[0] = c;
     }
     return out;

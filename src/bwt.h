@@ -30,4 +30,4 @@ size_t bwt_encode(const uint8_t *input, size_t len, uint8_t *bwt_out);
  */
 uint8_t *bwt_decode(const uint8_t *bwt, size_t len, size_t primary_index);
 
-#endif // BWT_H
+#endif 

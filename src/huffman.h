@@ -12,7 +12,7 @@
 #include "fileio.h"
 #include "huffsize.h"
 
-extern unsigned char *B; // bit streme buff
+extern uint8_t *B; // bit streme buff
 extern size_t m;         // number of vailid bits
 
 

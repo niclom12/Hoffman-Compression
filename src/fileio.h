@@ -21,6 +21,11 @@ int read_frequencies(const char *filename, int *freq);
 // Reads entire file into memory (optional)
 char* read_text_file_to_buffer(const char *filename, long *length);
 
+uint8_t *read_text_file_to_buffer_u8(const char *filename, long *length);
+
+char  *escape_whitespace(const uint8_t *in, size_t len, size_t *out_len);
+uint8_t *unescape_whitespace(const char  *in, size_t len, size_t *out_len);
+
 // Write binary compressed output
 int write_binary_file(const char *filename, const uint8_t *data, long length);
 

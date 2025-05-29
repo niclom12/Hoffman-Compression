@@ -4,87 +4,85 @@
 #include <ctype.h>
 #include <stdio.h>
 
-char *rle_encode(const char *in_buf, size_t in_len, size_t *out_len) {
+uint8_t *rle_encode(const uint8_t *in_buf, size_t in_len, size_t *out_len) {
+    // worst case every byte is escaped plus a count, so 2×in_len+1 is safe
     size_t max_size = in_len * 2 + 1;
-    char *enc = malloc(max_size);
+    uint8_t *enc = malloc(max_size);
     if (!enc) return NULL;
 
     size_t j = 0;
     for (size_t i = 0; i < in_len; ++i) {
-        char c = in_buf[i];
+        uint8_t c = in_buf[i];
 
         // escape digits and backslashes
-        if (isdigit((unsigned char)c)) {
+        if (isdigit(c)) {
             enc[j++] = '\\';
         } else if (c == '\\') {
             enc[j++] = '\\';
             enc[j++] = '\\';
         }
 
-        // write the character itself
+        // write the byte itself
         enc[j++] = c;
 
         // count run length
         size_t run = 1;
-        while (i + 1 < in_len && in_buf[i + 1] == c) {
-            run++;
-            i++;
+        while (i+1 < in_len && in_buf[i+1] == c) {
+            run++; i++;
         }
         if (run > 1) {
-            // append the count
-            int written = snprintf(enc + j, max_size - j, "%zu", run);
-            if (written < 0 || (size_t)written >= max_size - j) {
-                // should never happen unless out of space
+            // append decimal count, as text
+            char numbuf[32];
+            int written = snprintf(numbuf, sizeof numbuf, "%zu", run);
+            if (written < 0 || (size_t)written > sizeof numbuf) {
                 free(enc);
                 return NULL;
             }
-            j += (size_t)written;
+            // copy those ASCII digits into enc[]
+            for (int k = 0; k < written; k++) {
+                enc[j++] = (uint8_t)numbuf[k];
+            }
         }
     }
 
-    enc[j] = '\0';
     *out_len = j;
     return enc;
 }
 
-char *rle_decode(const char *in_buf, size_t in_len, size_t *out_len) {
-    // start with double‐size buffer
+uint8_t *rle_decode(const uint8_t *in_buf, size_t in_len, size_t *out_len) {
+    // start with a buffer twice as large as input
     size_t cap = (in_len + 1) * 2;
-    char *dec = malloc(cap);
+    uint8_t *dec = malloc(cap);
     if (!dec) return NULL;
 
     size_t i = 0, j = 0;
     while (i < in_len) {
-        // read character (handling escape)
-        char c = in_buf[i++];
+        // read byte (handling escape)
+        uint8_t c = in_buf[i++];
         if (c == '\\' && i < in_len) {
             c = in_buf[i++];
         }
-        // parse run length (if any)
+
+        // parse decimal run length (if any)
         size_t run = 0;
-        while (i < in_len && isdigit((unsigned char)in_buf[i])) {
+        while (i < in_len && isdigit(in_buf[i])) {
             run = run * 10 + (in_buf[i++] - '0');
         }
         if (run == 0) run = 1;
 
-        // grow if needed
-        if (j + run >= cap) {
-            cap *= 2;
-            char *tmp = realloc(dec, cap);
-            if (!tmp) {
-                free(dec);
-                return NULL;
-            }
+        // ensure capacity
+        if (j + run > cap) {
+            do { cap *= 2; } while (j + run > cap);
+            uint8_t *tmp = realloc(dec, cap);
+            if (!tmp) { free(dec); return NULL; }
             dec = tmp;
         }
-
-        // write out the run
-        for (size_t k = 0; k < run; ++k) {
+        // output the run
+        for (size_t k = 0; k < run; k++) {
             dec[j++] = c;
         }
     }
 
-    dec[j] = '\0';
     *out_len = j;
     return dec;
 }

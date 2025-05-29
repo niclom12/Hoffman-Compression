@@ -1,0 +1,7 @@
+1. classify_SL (if you were doing SA-IS) or here simply collect S₁ and S₀.
+2. radix_sort_triples over S₁ using counting sort on three passes (one per character).
+3. assign_ranks into an array rank12[]; build the reduced string R[].
+4. recurse if any ties, else use direct SA on R (e.g. bucket sort since all ranks <|S₁|).
+5. sort_S0 by (T[i], rank12[i+1]).
+6. merge_S0_S12 with the two comparison routines.
+7. compute_BWT by walking SA and picking T[(SA[k]+n−1)%n].

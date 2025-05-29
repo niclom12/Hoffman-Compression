@@ -2,6 +2,9 @@
 #define RLE_H
 
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
  * Run‐length encode `in_buf[0..in_len)`.
@@ -10,7 +13,7 @@
  * to the number of bytes (excluding the final '\\0').
  * Caller must free().
  */
-char *rle_encode(const char *in_buf, size_t in_len, size_t *out_len);
+uint8_t *rle_encode(const uint8_t *in_buf, size_t in_len, size_t *out_len);
 
 /**
  * Run‐length decode `in_buf[0..in_len)`.
@@ -19,6 +22,6 @@ char *rle_encode(const char *in_buf, size_t in_len, size_t *out_len);
  * to the number of bytes (excluding the final '\\0').
  * Caller must free().
  */
-char *rle_decode(const char *in_buf, size_t in_len, size_t *out_len);
+uint8_t *rle_decode(const uint8_t *in_buf, size_t in_len, size_t *out_len);
 
 #endif // RLE_H
