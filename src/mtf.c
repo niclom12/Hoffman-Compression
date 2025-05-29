@@ -14,6 +14,7 @@ unsigned char *mtf_encode(const unsigned char *in,
     unsigned char list[256];
     for (int i = 0; i < 256; ++i) list[i] = (unsigned char)i;
 
+    *out_len = 0;
     for (size_t i = 0; i < n; ++i) {
         unsigned char c = in[i];
 
@@ -39,7 +40,7 @@ unsigned char *mtf_decode(const unsigned char *indices,
 
     unsigned char list[256];
     for (int i = 0; i < 256; ++i) list[i] = (unsigned char)i;
-
+    *out_len = 0;
     for (size_t i = 0; i < n; ++i) {
         int k = indices[i];                 /* 0-255 */
         unsigned char c = list[k];

@@ -12,6 +12,32 @@
 
 #define MAGIC "BWH1"
 
+/* Simple CRC-32 (poly = 0xEDB88320, same as zlib) ------------------------- */
+#include <stdint.h>
+
+uint32_t crc32(const void *data, size_t len)
+{
+    static uint32_t table[256];
+    static int      have_table = 0;
+
+    if (!have_table) {                               /* build once          */
+        for (int i = 0; i < 256; ++i) {
+            uint32_t crc = (uint32_t)i;
+            for (int k = 0; k < 8; ++k)
+                crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+            table[i] = crc;
+        }
+        have_table = 1;
+    }
+
+    uint32_t crc = 0xFFFFFFFFu;
+    const unsigned char *p = data;
+    while (len--)
+        crc = table[(crc ^ *p++) & 0xFFu] ^ (crc >> 8);
+    return crc ^ 0xFFFFFFFFu;
+}
+
+
 /* helper to write little-endian regardless of host endianness */
 static void le64_write(FILE *fp, uint64_t v)
 {
@@ -61,20 +87,24 @@ int compress(const char *src, const char *dst)
 
     // borrows wheeler transform
     uint8_t *bwt_buf = malloc(n + 1);
-    size_t primary = bwt_encode((uint8_t *)orig, n, bwt_buf);
-
+    size_t primary = bwt_encode2((uint8_t *)orig, n, bwt_buf);
+    printf("After BWT encode : %08x (%zu bytes)\n", crc32(bwt_buf, n+1), n+1);
     
     // move to front encoding
     size_t mtf_len;
     unsigned char *mtf_buf = mtf_encode(bwt_buf, n + 1, &mtf_len);
     free(bwt_buf); free(orig);
     if (!mtf_buf) { perror("mtf"); return -1; }
+    printf("After MTF encode : %08x (%zu bytes)\n", crc32(mtf_buf, mtf_len), mtf_len);
 
     // run length encoding
     size_t rle_len;
     char *rle_buf = rle_encode((char *)mtf_buf, mtf_len, &rle_len);
     free(mtf_buf);
     if (!rle_buf) { perror("rle_encode"); return -1; }
+
+    printf("After RLE encode : %08x (%zu bytes)\n", crc32(rle_buf, rle_len), rle_len);
+
 
     // building huffman and ecoding (entropy encoding)
     int freq[HUFFMAN_SIZE] = {0}; // all frequencies are 0 - since we have normal ascii
@@ -86,7 +116,12 @@ int compress(const char *src, const char *dst)
     uint32_t hcode[HUFFMAN_SIZE] = {0};
     huff_build(freq, hlen, hcode);
 
-    size_t worst_bits = rle_len * 15;
+    
+    uint8_t max_len = 0;
+    for (int s = 0; s < HUFFMAN_SIZE; ++s)
+        if (hlen[s] > max_len) max_len = hlen[s];
+    size_t worst_bits = rle_len * max_len;
+
     extern unsigned char *B; 
     extern size_t m;
     B = calloc((worst_bits + 7) / 8, 1);
@@ -116,6 +151,7 @@ int compress(const char *src, const char *dst)
 
 int decompress(const char *src, const char *dst)
 {
+    // read in the compressed file
     FILE *fp = fopen(src, "rb");
     if (!fp) { 
         perror("fopen"); 
@@ -174,21 +210,20 @@ int decompress(const char *src, const char *dst)
     }
     fclose(fp);
 
-    char *rle_buf = malloc(orig_len + 1);     
-    if (!rle_buf) {
-         perror("malloc"); 
-         free(bitbuf); return -1; 
-    }
+    
 
     size_t rle_len = huff_decode(bitbuf, bit_len, hlen, hcode, NULL);
+    char *rle_buf  = malloc(rle_len); 
     huff_decode(bitbuf, bit_len, hlen, hcode, (unsigned char*)rle_buf);
     free(bitbuf);
-
+    
     size_t mtf_len;
     unsigned char *mtf_buf = (unsigned char*) 
     rle_decode(rle_buf, rle_len, &mtf_len);
-    free(rle_buf);
     
+    printf("After RLE decode : %08x (%zu bytes)\n", crc32(rle_buf, rle_len), rle_len);
+    free(rle_buf);
+
     if (!mtf_buf) { 
         fprintf(stderr,"RLE decode failed\n"); 
         return -1; 
@@ -201,11 +236,16 @@ int decompress(const char *src, const char *dst)
         fprintf(stderr,"MTF decode failed\n"); 
         return -1; 
     }
+
+    printf("After MTF decode : %08x (%zu bytes)\n", crc32(mtf_buf, mtf_len), mtf_len);
+
     
-    uint8_t *recovered = bwt_decode(bwt_buf, bwt_len, (size_t)primary);
+    uint8_t *recovered = bwt_decode_dc3(bwt_buf, bwt_len, (size_t)primary);
+    // memmove(recovered, recovered + 1, orig_len);
+
+    printf("After BWT decode : %08x (%zu bytes)\n", crc32(bwt_buf, bwt_len), bwt_len);
+
     free(bwt_buf);
-
-
     FILE *out = fopen(dst, "wb");
     if (!out) { 
         perror("out"); 

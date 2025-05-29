@@ -29,5 +29,6 @@ size_t bwt_encode(const uint8_t *input, size_t len, uint8_t *bwt_out);
  *                          len−1 bytes.
  */
 uint8_t *bwt_decode(const uint8_t *bwt, size_t len, size_t primary_index);
+size_t bwt_encode2(const uint8_t *T, size_t n, uint8_t *L);
 
 #endif // BWT_H

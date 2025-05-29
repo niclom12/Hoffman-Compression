@@ -4,48 +4,62 @@
 #include <ctype.h>
 #include <stdio.h>
 
-char *rle_encode(const char *in_buf, size_t in_len, size_t *out_len) {
-    size_t max_size = in_len * 2 + 1;
-    char *enc = malloc(max_size);
+//c char *enc = NULL; size_t cap = 4096, j = 0; enc = malloc(cap); … ensure(cap, j + 16); /* macro that doubles `cap` and reallocs */
+#define ENSURE(buf, cap, need)                          \
+    do {                                                \
+        if ((need) > (cap)) {                           \
+            size_t new_cap = (cap);                     \
+            while (new_cap <= (need)) new_cap <<= 1;    \
+            char *tmp__ = realloc((buf), new_cap);      \
+            if (!tmp__) {                               \
+                free(buf);                              \
+                return NULL;                            \
+            }                                           \
+            (buf) = tmp__;                              \
+            (cap) = new_cap;                            \
+        }                                               \
+    } while (0)
+
+char *rle_encode(const char *in_buf, size_t in_len, size_t *out_len)
+{
+    size_t cap = 4096;
+    size_t j   = 0;
+    char  *enc = malloc(cap);
     if (!enc) return NULL;
 
-    size_t j = 0;
     for (size_t i = 0; i < in_len; ++i) {
-        char c = in_buf[i];
+        unsigned char c = (unsigned char)in_buf[i];
 
-        // escape digits and backslashes
-        if (isdigit((unsigned char)c)) {
+        if (c == '\\' || isdigit(c)) {
+            ENSURE(enc, cap, j + 2);  
             enc[j++] = '\\';
-        } else if (c == '\\') {
-            enc[j++] = '\\';
-            enc[j++] = '\\';
+            enc[j++] = (char)c;      
+        } else {
+            ENSURE(enc, cap, j + 1);
+            enc[j++] = (char)c;
         }
 
-        // write the character itself
-        enc[j++] = c;
-
-        // count run length
         size_t run = 1;
-        while (i + 1 < in_len && in_buf[i + 1] == c) {
-            run++;
-            i++;
+        while (i + 1 < in_len && in_buf[i + 1] == (char)c) {
+            ++run;
+            ++i;
         }
         if (run > 1) {
-            // append the count
-            int written = snprintf(enc + j, max_size - j, "%zu", run);
-            if (written < 0 || (size_t)written >= max_size - j) {
-                // should never happen unless out of space
-                free(enc);
-                return NULL;
-            }
-            j += (size_t)written;
+            char num[32];
+            int  n = snprintf(num, sizeof num, "%zu", run);
+            ENSURE(enc, cap, j + (size_t)n);
+            memcpy(enc + j, num, (size_t)n);
+            j += (size_t)n;
         }
     }
 
-    enc[j] = '\0';
+    ENSURE(enc, cap, j + 1);
+    enc[j]   = '\0';      /* safety NUL – harmless */
     *out_len = j;
     return enc;
 }
+
+
 
 char *rle_decode(const char *in_buf, size_t in_len, size_t *out_len) {
     // start with double‐size buffer

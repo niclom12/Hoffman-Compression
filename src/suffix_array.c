@@ -33,8 +33,8 @@ int build_suffix_array(const uint8_t *txt, size_t n, int *suffixArr)
 
     for (size_t i = 0; i < n; ++i) {
         suffixes[i].index   = (int)i;
-        suffixes[i].rank[0] = txt[i];                
-        suffixes[i].rank[1] = (i + 1 < n) ? txt[i + 1] : -1; // make sure that we can assign an adjactent character
+        suffixes[i].rank[0] = (unsigned)txt[i];                
+        suffixes[i].rank[1] = (i + 1 < n) ? (unsigned)txt[i + 1] : -1; // make sure that we can assign an adjactent character
     }
     qsort(suffixes, n, sizeof *suffixes, cmp_suffix); // sort the first char
    
