@@ -2,7 +2,6 @@
 bin/
 obj/
 .vscode/
-scripts/
 test_data/
 test_data2/
 test_outputs/
