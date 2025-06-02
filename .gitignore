@@ -5,3 +5,7 @@ obj/
 test_data/
 test_data2/
 test_outputs/
+scripts/compressed_results
+scripts/plots
+scripts/test_data
+scripts/data 
