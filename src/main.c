@@ -3,17 +3,6 @@
 #include <string.h>
 #include "compress.h"
 
-/* --------------------------------------------------------- */
-/*  argv                                                     */
-/*  0  exe                                                   */
-/*  1  c|d                                                   */
-/*  2  input                                                 */
-/*  3  output                                                */
-/*  4  BWT  (optional, "0" or "1")                           */
-/*  5  MTF  (optional, "0" or "1")                           */
-/*  6  RLE  (optional, "0" or "1")                           */
-/* --------------------------------------------------------- */
-
 static void usage(const char *exe)
 {
     fprintf(stderr,

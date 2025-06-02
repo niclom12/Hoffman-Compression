@@ -4,31 +4,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/**
- * Perform the Burrows–Wheeler transform on an input buffer.
- *
- * @param input     Pointer to the input bytes (length = len).
- * @param len       Number of bytes in input.
- * @param bwt_out   Buffer of length len+1 to receive the BWT output.
- *                  (You must allocate this before calling.)
- * @return          The primary index in the sorted rotations
- *                  (i.e. the row corresponding to the original text).
- */
 size_t bwt_encode(const uint8_t *input, size_t len, uint8_t *bwt_out);
 
-/**
- * Invert a Burrows–Wheeler transform.
- *
- * @param bwt               Pointer to the BWT data (length = len).
- * @param len               Number of bytes in bwt (including the sentinel).
- * @param primary_index     The index returned by bwt_encode.
- * @return                  Newly malloc’d buffer of length (len) bytes,
- *                          containing the original data _including_
- *                          the trailing '\0' sentinel. You can drop
- *                          that sentinel if you only want the original
- *                          len−1 bytes.
- */
-uint8_t *bwt_decode(const uint8_t *bwt, size_t len, size_t primary_index);
-size_t bwt_encode2(const uint8_t *T, size_t n, uint8_t *L);
+size_t bwt_encode_count_sort(const uint8_t *T, size_t n, uint8_t *L);
 
-#endif // BWT_H
+uint8_t *bwt_decode(const uint8_t *bwt, size_t len, size_t primary_index);
+
+void counting_sort(int *sa, int *rank, int n, int k, int *tmp);
+
+#endif 

@@ -4,8 +4,7 @@
 #include "list.h"
 #include "mtf.h"
 
-unsigned char *mtf_encode(const unsigned char *in,
-                                 size_t n, size_t *out_len)
+unsigned char *mtf_encode(const unsigned char *in, size_t n, size_t *out_len)
 {
     unsigned char *out = malloc(n);
     if (!out) return NULL;
